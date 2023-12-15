@@ -36,7 +36,7 @@ for r1_file in "${data_dir}"/*_R1.fastq; do
         # Check if the corresponding R2 file exists
         if [ -e "$r2_file" ]; then
             # Extract dataset name from the R1 filename
-            dataset_name=$(basename "$r1_file" _R1.fq)
+            dataset_name=$(basename "$r1_file")
 
             # Run STAR aligner for the current pair
             STAR \
@@ -50,6 +50,21 @@ for r1_file in "${data_dir}"/*_R1.fastq; do
         fi
     fi
 done
+
+cd ${output_dir}
+
+for file in *_R1.fastq*; do
+    # Check if the file exists
+    if [ -e "$file" ]; then
+        # Extract the filename without the "_R1.fastq" string
+        new_name=$(echo "$file" | sed 's/_R1.fastq//')
+
+        # Rename the file
+        mv "$file" "$new_name"
+        echo "Renamed: $file to $new_name"
+    fi
+done
+
 
 
 
