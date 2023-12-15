@@ -44,7 +44,25 @@ for r1_file in "${data_dir}"/*_R1.fastq; do
                 --outSAMtype BAM SortedByCoordinate \
                 --genomeDir ${genome_index} \
                 --readFilesIn ${r1_file} ${r2_file} \
-                --outFileNamePrefix ${output_dir}/${dataset_name}_
+		--outFileNamePrefix ${output_dir}/${dataset_name}_ \
+		--outReadsUnmapped None \
+		--twopassMode Basic \
+		--outSAMstrandField intronMotif \
+		--outSAMunmapped Within \
+		--chimSegmentMin 12 \
+          	--quantMode GeneCounts \
+		--chimOutJunctionFormat 1 \
+          	--alignMatesGapMax 100000 \
+         	--alignSJstitchMismatchNmax 5 -1 5 5 \
+          	--chimMultimapScoreRange 3 \
+          	--chimScoreJunctionNonGTAG -4 \
+          	--chimMultimapNmax 20 \
+          	--chimNonchimScoreDropMin 10 \
+          	--peOverlapNbasesMin 12 \
+          	--peOverlapMMp 0.1 \
+          	--alignInsertionFlush Right \
+          	--alignSplicedMateMapLminOverLmate 0 \
+          	--alignSplicedMateMapLmin 30
         else
             echo "Corresponding R2 file not found for $r1_file"
         fi
@@ -64,8 +82,4 @@ for file in *_R1.fastq*; do
         echo "Renamed: $file to $new_name"
     fi
 done
-
-
-
-
 
