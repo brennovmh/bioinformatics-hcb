@@ -1,6 +1,0 @@
-### RODAR ARRIBA PARTINDO DE FASTQ COM ARQUIVOD TESTE
-./run_arriba.sh ../ref/ref_STAR/\
-../ref/Homo_sapiens.GRCh38.110.gtf \
-../ref/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa database/blacklist_hg19_hs37d5_GRCh37_v2.4.0.tsv.gz \
-database/known_fusions_hg19_hs37d5_GRCh37_v2.4.0.tsv.gz \
-database/protein_domains_hg19_hs37d5_GRCh37_v2.4.0.gff3 8 test/read1.fastq.gz test/read2.fastq.gz
