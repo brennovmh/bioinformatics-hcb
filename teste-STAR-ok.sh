@@ -41,6 +41,7 @@ for r1_file in "${data_dir}"/*_R1.fastq; do
             # Run STAR aligner for the current pair
             STAR \
                 --runMode alignReads \
+		--runThreadN 16 \
                 --outSAMtype BAM SortedByCoordinate \
                 --genomeDir ${genome_index} \
                 --readFilesIn ${r1_file} ${r2_file} \
@@ -83,3 +84,30 @@ for file in *_R1.fastq*; do
     fi
 done
 
+# Começando alterações 18/12
+
+diretorio_f="./Fusions"
+
+# Verifica se o diretório existe
+if [ -d "$diretorio_f" ]; then
+    echo "O diretório $diretorio já existe."
+else
+    # Cria o diretório se não existir
+    mkdir -p "$diretorio_f"
+    echo "Diretório $diretorio criado com sucesso."
+fi
+
+# Iterate over *Chimeric.out.junction files in the input directory
+for junction_file in "${output_dir}"/*Chimeric.out.junction; do
+    if [ -e "$junction_file" ]; then
+        # Extract sample name from the file
+        sample_name=$(basename "$junction_file" "_Chimeric.out.junction")
+
+        # Run STAR-Fusion for the current file
+        /home/hcb/tools/STAR-Fusion-v1.12.0/STAR-Fusion \
+ --genome_lib_dir /home/hcb/tools/STAR-Fusion-v1.12.0/GRCh38_gencode_v37_CTAT_lib_Mar012021.plug-n-play/ctat_genome_lib_build_dir/ \
+ -J ${junction_file} --output_dir "${diretorio_f}/${sample_name}_STAR-Fusion_output/"
+    else
+        echo "Chimeric.out.junction file not found for $junction_file"
+    fi
+done
