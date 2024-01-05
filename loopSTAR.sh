@@ -36,7 +36,7 @@ for r1_file in "${data_dir}"/*_R1.fastq; do
             # Run STAR aligner for the current pair
             STAR \
                 --runMode alignReads \
-		--runThreadN 16 \
+		--runThreadN 8 \
                 --outSAMtype BAM SortedByCoordinate \
                 --genomeDir ${genome_index} \
                 --readFilesIn ${r1_file} ${r2_file} \
