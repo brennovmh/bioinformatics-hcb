@@ -8,4 +8,33 @@ seqfu lanes -o /home/hcb-info/Analises <inputDir>
 ### Trimagem: realizei trimagem utilizando o trimmomatic e em seguida o fastqc no mesmo script: loopTrimmomatic.sh
 ### Após a execução do script anterior foi realizado trimagem e fastqc. A partir de agora os resultados estão em uma pasta chamada ./paired
 ### Agora vou realizar a montagem com STAR utilizado o script loopSTAR.sh
+### Essa parte abaixo do script não foi rodada, vou utilizar na segunda-feira
+
+"# Começando alterações 18/12
+
+diretorio_f="./Fusions"
+
+# Verifica se o diretório existe
+if [ -d "$diretorio_f" ]; then
+    echo "O diretório $diretorio já existe."
+else
+    # Cria o diretório se não existir
+    mkdir -p "$diretorio_f"
+    echo "Diretório $diretorio criado com sucesso."
+fi
+
+# Iterate over *Chimeric.out.junction files in the input directory
+for junction_file in "${output_dir}"/*Chimeric.out.junction; do
+    if [ -e "$junction_file" ]; then
+        # Extract sample name from the file
+        sample_name=$(basename "$junction_file" "_Chimeric.out.junction")
+
+        # Run STAR-Fusion for the current file
+        /home/hcb/tools/STAR-Fusion-v1.12.0/STAR-Fusion \
+ --genome_lib_dir /home/hcb/tools/STAR-Fusion-v1.12.0/GRCh38_gencode_v37_CTAT_lib_Mar012021.plug-n-play/ctat_genome_lib_build_dir/ \
+ -J ${junction_file} --output_dir "${diretorio_f}/${sample_name}_STAR-Fusion_output/"
+    else
+        echo "Chimeric.out.junction file not found for $junction_file"
+    fi
+done"
 
