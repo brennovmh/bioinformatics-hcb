@@ -5,3 +5,5 @@
 
 seqfu lanes -o /home/hcb-info/Analises <inputDir>
 
+### Trimagem: realizei trimagem utilizando o trimmomatic e em seguida o fastqc no mesmo script: loopTrimmomatic.sh
+
