@@ -47,14 +47,14 @@ cd paired/
 
 fastqc *
 
-diretorio1="./fastqc"
+diretorio3="./fastqc"
 
 # Verifica se o diretório existe
-if [ -d "$diretorio1" ]; then
+if [ -d "$diretorio3" ]; then
     echo "O diretório $diretorio já existe."
 else
     # Cria o diretório se não existir
-    mkdir -p "$diretorio1"
+    mkdir -p "$diretorio3"
     echo "Diretório $diretorio criado com sucesso."
 fi
 
