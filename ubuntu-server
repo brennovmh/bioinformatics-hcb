@@ -1,0 +1,7 @@
+## Iniciando novamente uma nova rotina de análise
+
+## Após baixar os dados do basespace, removi os arquivos das pastas utilizando o script move.sh
+## Para fazer o merge dos arquivos gerados em cada linha de sequenciamento utilizei o seqfu (instalado com o bioconda)
+
+seqfu lanes -o /home/hcb-info/Analises <inputDir>
+
