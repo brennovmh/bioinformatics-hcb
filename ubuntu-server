@@ -8,6 +8,7 @@ seqfu lanes -o /home/hcb-info/Analises <inputDir>
 ### Trimagem: realizei trimagem utilizando o trimmomatic e em seguida o fastqc no mesmo script: loopTrimmomatic.sh
 ### Após a execução do script anterior foi realizado trimagem e fastqc. A partir de agora os resultados estão em uma pasta chamada ./paired
 ### Agora vou realizar a montagem com STAR utilizado o script loopSTAR.sh
+### Realizei a análise com arriba com o script loopArriba.sh
 ### Essa parte abaixo do script não foi rodada, vou utilizar na segunda-feira
 
 "# Começando alterações 18/12
