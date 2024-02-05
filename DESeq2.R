@@ -90,3 +90,53 @@ h3 <- Heatmap(mean, row_labels = df.top$symbol[rows_keep],
 
 h<-h1+h2+h3
 h
+
+#########################################
+
+                      row.names(sigs_df)
+View(sigs_df)
+
+sigs3 <- data.frame(GeneName = row.names(sigs_df), log2FoldChange = as.numeric(sigs_df$log2FoldChange), pvalue = sigs_df$padj)
+
+
+EnhancedVolcano(sigs3,
+                lab = sigs3$GeneName,
+                x = 'log2FoldChange',
+                y = 'pvalue',
+                pCutoff = 10e-5,
+                FCcutoff = 1.333,
+                xlim = c(-5.7, 5.7),
+                ylim = c(0, -log10(10.2e-12)),
+                pointSize = 1.3,
+                labSize = 2.6,
+                title = 'The results',
+                subtitle = 'Differential expression analysis',
+                caption = 'log2fc cutoff=1.333; p value cutof=10e-5',
+                legendPosition = "right",
+                legendLabSize = 14,
+                col = c('lightblue', 'orange', 'blue', 'red2'),
+                colAlpha = 0.6,
+                drawConnectors = TRUE,
+                hline = c(10e-8),
+                widthConnectors = 0.5)
+
+###################
+
+plotMA(res, ylim=c(-5, 5), alpha = 0.01)
+
+topGene <- rownames(sigs)[sigs$padj <= sort(sigs$padj)[5] &!is.na(sigs$padj)]
+
+with(res[topGene, ], {
+  points(baseMean, log2FoldChange, col="dodgerblue", cex=1.5, lwd=2)
+  text(baseMean, log2FoldChange, topGene, pos=2, col="dodgerblue")
+})
+
+sig.dat <- assay(rlog_out)[res$padj < 0.0001 & !is.na(res$padj), ]
+annC <- data.frame(condition=condition)
+rownames(annC) <- colnames(sig.dat)
+
+pheatmap(sig.dat, scale="row", fontsize_row=9, annotation_col = annC)
+data.class(sig.dat)
+
+sig.dat.df <- as_data_frame(sig.dat)
+write.csv2(sig.dat, file = 'DESeq_results.csv', sep = ',')
