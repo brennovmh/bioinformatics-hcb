@@ -131,3 +131,9 @@ cleaned_tx_abundance_unique_log2_matrix <- tx_abundance_unique_log2_matrix[compl
 
 filtered_expression <- varFilter(cleaned_tx_abundance_unique_log2_matrix, var.fun = IQR, var.cutoff = 0.5)
 nrow(filtered_expression) #Sobraram 228 genes com expressão com variância significativa
+
+
+pca(filtered_expression)
+
+tsne_result <- tsne(filtered_expression, perplex = 10)
+tsne_result
