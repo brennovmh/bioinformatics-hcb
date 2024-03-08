@@ -1,0 +1,133 @@
+library(tximport)
+library(ensembldb)
+library(AnnotationHub)
+library(DESeq2)
+library(dplyr)
+library(tidyverse)
+library(genefilter)
+
+
+
+
+
+hub = AnnotationHub()
+
+#make sure to use the right species
+ensdb_query <- query(hub, c("EnsDb", "sapiens", "110"))
+ensdb_query
+
+ensdb_109 <- ensdb_query[['AH113665']]
+
+# Extract transcript and gene information
+tx_data <- transcripts(ensdb_109, return.type = "DataFrame")
+
+# Create the tx2gene data.frame
+tx2gene <- tx_data[, c("tx_id", "gene_id")]
+
+# Especifique o caminho absoluto para o diretório
+dir_path <- "/home/bvmh/Desktop/salmon/"
+
+# Lista todos os arquivos dentro do diretório com extensão .sf
+files <- list.files(dir_path, pattern = "\\.sf$", full.names = TRUE)
+sample_names <- gsub("_quant$", "", basename(files))
+names(files) <- sample_names
+files
+
+
+# Importa os arquivos usando tximport
+txi <- tximport(files, type = "salmon", tx2gene = tx2gene, ignoreTxVersion = TRUE)
+
+df_tx <- as.data.frame(txi)
+
+#############################################################
+
+tx_abundance <- data.frame(GeneName = row.names(df_tx), BM1075 = df_tx$abundance.BM1075.1_salmon_output.quant.sf, BM1077 = df_tx$abundance.BM1077.1_salmon_output.quant.sf, BM1078 = df_tx$abundance.BM1078.1_salmon_output.quant.sf, BM1079 = df_tx$abundance.BM1079.1_salmon_output.quant.sf, BM1092 = df_tx$abundance.BM1092.1_salmon_output.quant.sf, BM1115 = df_tx$abundance.BM1115.1_salmon_output.quant.sf, BM1116 = df_tx$abundance.BM1116.1_salmon_output.quant.sf, BM1141 = df_tx$abundance.BM1141.1_salmon_output.quant.sf, BM1146 = df_tx$abundance.BM1146.1_salmon_output.quant.sf, BM1152 = df_tx$abundance.BM1152.1_salmon_output.quant.sf, BM1153 = df_tx$abundance.BM1153.1_salmon_output.quant.sf, BM1158 = df_tx$abundance.BM1158.1_salmon_output.quant.sf, BM1161 = df_tx$abundance.BM1161.1_salmon_output.quant.sf, BM1170 = df_tx$abundance.BM1170.2_salmon_output.quant.sf, BM1179 = df_tx$abundance.BM1179.1_salmon_output.quant.sf, BM1181 = df_tx$abundance.BM1181.1_salmon_output.quant.sf, BM1182 = df_tx$abundance.BM1185.2_salmon_output.quant.sf, BM1186 = df_tx$abundance.BM1186.1_salmon_output.quant.sf, BM1189 = df_tx$abundance.BM1189.1_salmon_output.quant.sf, BM1206 = df_tx$abundance.BM1206.1_salmon_output.quant.sf, BM1260 = df_tx$abundance.BM1260.1_salmon_output.quant.sf, BM1277 = df_tx$abundance.BM1277.1_salmon_output.quant.sf, BM1284-1 = df_tx$abundance.BM1284.1_salmon_output.quant.sf, BM1284-5 = df_tx$abundance.BM1284.5_salmon_output.quant.sf, BM1292 = df_tx$abundance.BM1292.1_salmon_output.quant.sf, BM1314 = df_tx$abundance.BM1314.1_salmon_output.quant.sf, BM1324 = df_tx$abundance.BM1324.1_salmon_output.quant.sf, BM1495 = df_tx$abundance.BM1395.1_salmon_output.quant.sf, BM1471 = df_tx$abundance.BM1471.1_salmon_output.quant.sf, BM1489 = df_tx$abundance.BM1489.1_salmon_output.quant.sf, BM1490 = df_tx$abundance.BM1490.1_salmon_output.quant.sf, BM1498 = df_tx$abundance.BM1498.1_salmon_output.quant.sf, BM1500 = df_tx$abundance.BM1500.1_salmon_output.quant.sf, BM1501 = df_tx$abundance.BM1501.1_salmon_output.quant.sf, BM1503 = df_tx$abundance.BM1503.1_salmon_output.quant.sf, BM1505 = df_tx$abundance.BM1505.1_salmon_output.quant.sf, BM1507 = df_tx$abundance.BM1507.1_salmon_output.quant.sf, BM1519 = df_tx$abundance.BM1519.1_salmon_output.quant.sf, BM1523 = df_tx$abundance.BM1523.1_salmon_output.quant.sf, BM1526 = df_tx$abundance.BM1526.1_salmon_output.quant.sf, BM1532 = df_tx$abundance.BM1532.1_salmon_output.quant.sf, BM770 = df_tx$abundance.BM770.13_salmon_output.quant.sf, BM810 = df_tx$abundance.BM810.1_salmon_output.quant.sf, BM821 =df_tx$abundance.BM821.4_salmon_output.quant.sf)
+
+
+
+tx_abundance <- data.frame(
+  GeneName = row.names(df_tx),
+  BM1075 = df_tx$abundance.BM1075.1_salmon_output.quant.sf,
+  BM1077 = df_tx$abundance.BM1077.1_salmon_output.quant.sf,
+  BM1078 = df_tx$abundance.BM1078.1_salmon_output.quant.sf,
+  BM1079 = df_tx$abundance.BM1079.1_salmon_output.quant.sf,
+  BM1092 = df_tx$abundance.BM1092.1_salmon_output.quant.sf,
+  BM1115 = df_tx$abundance.BM1115.1_salmon_output.quant.sf,
+  BM1116 = df_tx$abundance.BM1116.1_salmon_output.quant.sf,
+  BM1141 = df_tx$abundance.BM1141.1_salmon_output.quant.sf,
+  BM1146 = df_tx$abundance.BM1146.1_salmon_output.quant.sf,
+  BM1152 = df_tx$abundance.BM1152.1_salmon_output.quant.sf,
+  BM1153 = df_tx$abundance.BM1153.1_salmon_output.quant.sf,
+  BM1158 = df_tx$abundance.BM1158.1_salmon_output.quant.sf,
+  BM1161 = df_tx$abundance.BM1161.1_salmon_output.quant.sf,
+  BM1170 = df_tx$abundance.BM1170.2_salmon_output.quant.sf,
+  BM1179 = df_tx$abundance.BM1179.1_salmon_output.quant.sf,
+  BM1181 = df_tx$abundance.BM1181.1_salmon_output.quant.sf,
+  BM1182 = df_tx$abundance.BM1185.2_salmon_output.quant.sf,
+  BM1186 = df_tx$abundance.BM1186.1_salmon_output.quant.sf,
+  BM1189 = df_tx$abundance.BM1189.1_salmon_output.quant.sf,
+  BM1206 = df_tx$abundance.BM1206.1_salmon_output.quant.sf,
+  BM1260 = df_tx$abundance.BM1260.1_salmon_output.quant.sf,
+  BM1277 = df_tx$abundance.BM1277.1_salmon_output.quant.sf,
+  BM1284.1= df_tx$abundance.BM1284.1_salmon_output.quant.sf, # Usando backticks para nome com hífen
+  BM1284.5= df_tx$abundance.BM1284.5_salmon_output.quant.sf, # Usando backticks para nome com hífen
+  BM1292 = df_tx$abundance.BM1292.1_salmon_output.quant.sf,
+  BM1314 = df_tx$abundance.BM1314.1_salmon_output.quant.sf,
+  BM1324 = df_tx$abundance.BM1324.1_salmon_output.quant.sf,
+  BM1495 = df_tx$abundance.BM1395.1_salmon_output.quant.sf,
+  BM1471 = df_tx$abundance.BM1471.1_salmon_output.quant.sf,
+  BM1489 = df_tx$abundance.BM1489.1_salmon_output.quant.sf,
+  BM1490 = df_tx$abundance.BM1490.1_salmon_output.quant.sf,
+  BM1498 = df_tx$abundance.BM1498.1_salmon_output.quant.sf,
+  BM1500 = df_tx$abundance.BM1500.1_salmon_output.quant.sf,
+  BM1501 = df_tx$abundance.BM1501.1_salmon_output.quant.sf,
+  BM1503 = df_tx$abundance.BM1503.1_salmon_output.quant.sf,
+  BM1505 = df_tx$abundance.BM1505.1_salmon_output.quant.sf,
+  BM1507 = df_tx$abundance.BM1507.1_salmon_output.quant.sf,
+  BM1519 = df_tx$abundance.BM1519.1_salmon_output.quant.sf,
+  BM1523 = df_tx$abundance.BM1523.1_salmon_output.quant.sf,
+  BM1526 = df_tx$abundance.BM1526.1_salmon_output.quant.sf,
+  BM1532 = df_tx$abundance.BM1532.1_salmon_output.quant.sf,
+  BM770 = df_tx$abundance.BM770.13_salmon_output.quant.sf,
+  BM810 = df_tx$abundance.BM810.1_salmon_output.quant.sf,
+  BM821 = df_tx$abundance.BM821.4_salmon_output.quant.sf
+)
+
+library(org.Hs.eg.db)
+
+
+tx_abundance$symbol <- mapIds(org.Hs.eg.db, keys = tx_abundance$GeneName, keytype = 'ENSEMBL', column = 'SYMBOL')
+
+
+# Carregar os símbolos do arquivo de texto para uma lista
+symbols <- readLines("/home/bvmh/TARGETS_CUSTOM.txt")
+
+# Filtrar o dataframe usando os símbolos da lista
+filtered_df <- tx_abundance %>%
+  filter(symbol %in% symbols)
+
+# Exibir o dataframe filtrado
+print(filtered_df)
+
+tx_abundance_unique <- filtered_df[!duplicated(filtered_df$symbol), ]
+ 
+row.names(tx_abundance_unique) <- tx_abundance_unique$symbol
+
+tx_abundance_unique <- tx_abundance_unique[, -1]
+tx_abundance_unique <- tx_abundance_unique[, -45]
+
+tx_abundance_unique_log2 <- log2(tx_abundance_unique)
+
+
+write.csv(tx_abundance_unique_log2, "tx_abudance.csv", row.names = TRUE)
+
+# FIltrando com gene filter
+
+tx_abundance_unique_log2_matrix <- as.matrix(tx_abundance_unique_log2)
+
+tx_abundance_unique_log2_matrix[tx_abundance_unique_log2_matrix == -Inf] <- NA
+cleaned_tx_abundance_unique_log2_matrix <- tx_abundance_unique_log2_matrix[complete.cases(tx_abundance_unique_log2_matrix), ]
+
+
+filtered_expression <- varFilter(cleaned_tx_abundance_unique_log2_matrix, var.fun = IQR, var.cutoff = 0.5)
+nrow(filtered_expression) #Sobraram 228 genes com expressão com variância significativa
