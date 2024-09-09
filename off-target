@@ -1,0 +1,5 @@
+## Gerar BAM off-target
+bedtools intersect -v -a aligned_reads.bam -b target_regions.bed > off_target_reads.bam
+
+## Contar reads em cada arquivo, no BAM geral e no BAM off-target
+samtools view -c -F 4 200445_6M1M.bam
