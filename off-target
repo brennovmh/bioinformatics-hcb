@@ -3,3 +3,7 @@ bedtools intersect -v -a aligned_reads.bam -b target_regions.bed > off_target_re
 
 ## Contar reads em cada arquivo, no BAM geral e no BAM off-target
 samtools view -c -F 4 200445_6M1M.bam
+
+
+##Gerar bes a partir de arquivo bam
+samtools view -F 4 -b seu_arquivo.bam | bedtools bamtobed -i stdin > saida_mapeados.bed
