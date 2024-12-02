@@ -1,0 +1,6 @@
+###Criação de PoN para cnvkit
+nextflow run nf-core/createpanelrefs    -profile docker    --input samplesheet.csv    --tools cnvkit    --genome GATK.GRCh38    --outdir pon/ -r  updategatk
+
+###SAREK
+ nextflow run nf-core/sarek     -profile docker     --input samplesheet.csv     --outdir results_germline/     --tools haplotypecaller
+
