@@ -101,8 +101,8 @@ EnhancedVolcano(sigs,
                 lab = sigs3$symbol,
                 x = 'log2FoldChange',
                 y = 'pvalue',
-                pCutoff = 10e-5,
-                FCcutoff = 1.333,
+                pCutoff = 5e-2,
+                FCcutoff = 1,
                 xlim = c(-5.7, 5.7),
                 ylim = c(0, -log10(10.2e-12)),
                 pointSize = 5.9,
@@ -138,8 +138,42 @@ rownames(sig.dat.df) <- NULL
 rownames(sig.dat.df) <- sig.dat.df$symbol
 sig.dat.df$symbol <- NULL
 sig.dat <- as.matrix(sig.dat.df)
-condition <- c('Diagnóstico', 'Recaída', 'Diagnóstico', 'Recaída', 'Diagnóstico', 'Recaída')
-annC <- data.frame(condition=condition)
+Condition <- c('Diagnóstico', 'Recaída', 'Diagnóstico', 'Recaída', 'Diagnóstico', 'Recaída')
+annC <- data.frame(Condition=Condition)
 rownames(annC) <- colnames(sig.dat)
 pheatmap(sig.dat, scale="row", fontsize_row=9, annotation_col = annC)
+
+pheatmap(sig.dat, scale="row", fontsize_row=15, annotation_col = annC, annotation_names_col = FALSE)
+
+
+# Ajuste de cores para um visual mais agradável
+color_palette <- colorRampPalette(c("#313695", "#74add1", "#fefefe", "#f46d43", "#a50026"))(100)
+
+# Cores para as anotações
+annotation_colors <- list(
+  Condition = c("Diagnóstico" = "#56B4E9", "Recaída" = "#E69F00")  # Cores suaves para anotações
+)
+
+# Criar o gráfico com personalizações adicionais
+pheatmap(
+  sig.dat,
+  scale = "row",
+  fontsize_row = 13,
+  annotation_col = annC,
+  annotation_names_col = FALSE,         # Ocultar o nome da anotação
+  cluster_cols = TRUE,                  # Clusterização das colunas
+  cluster_rows = TRUE,                  # Clusterização das linhas
+  color = color_palette,                # Nova paleta de cores   # Quebras personalizadas na legenda
+  border_color = "grey90",              # Cor discreta para as bordas
+  treeheight_col = 40,                  # Ajuste na altura do dendrograma das colunas
+  treeheight_row = 40,                  # Ajuste na altura do dendrograma das linhas
+  main = "t1;19 - Diagnóstico x Recaída",  # Título principal
+  fontsize = 11,                        # Fonte geral
+  fontsize_col = 10,                    # Fonte das colunas
+  show_colnames = TRUE,                 # Mostrar nomes das colunas
+  show_rownames = TRUE,                 # Mostrar nomes das linhas
+  annotation_colors = annotation_colors,  # Cores para anotações
+  annotation_legend = TRUE              # Mostrar legenda das anotações
+)
+
 
