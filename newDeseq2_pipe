@@ -1,0 +1,145 @@
+library(DESeq2)
+library(ggplot2)
+library(ComplexHeatmap)
+library(circlize)
+library(tibble)
+library(dplyr)
+library(tibble)
+library('org.Hs.eg.db')
+library(pheatmap)
+
+
+X1_19 -> Counts
+#Transformar primeira coluna em index
+Counts %>%
+  remove_rownames() %>%
+  column_to_rownames(var = 'Geneid') -> Counts
+
+## FIltrar linhas com count menor que 50
+Counts <- Counts[rowSums(Counts) >= 50, ]
+
+condition <- factor(c('D', 'R', 'D', 'R', 'D', 'R'))
+coldata <- data.frame(row.names = colnames(Counts), condition)
+dds <- DESeqDataSetFromMatrix(countData = Counts, colData = coldata, design = ~condition)
+dds <- DESeq(dds)
+vsdata <- vst(dds, blind = FALSE)
+vsdata <- varianceStabilizingTransformation(dds, blind = FALSE)
+plotPCA(vsdata, intgroup = 'condition')
+plotDispEsts(dds)
+res <- results(dds, contrast = c('condition','D', 'R'))
+# Significant genes
+sigs <- na.omit(res)
+sigs <- sigs[sigs$padj<0.05,]
+sigs
+
+sigs_df <- as.data.frame(sigs)
+sigs_df$symbol <- mapIds(org.Hs.eg.db, keys = row.names(sigs_df), keytype = 'ENSEMBL', column = 'SYMBOL')
+sigs_df
+
+df.top <- sigs_df[ sigs_df$baseMean >30 & (abs(sigs_df$log2FoldChange) >2),]
+df.top
+
+df.top <- df.top[order(df.top$log2FoldChange, decreasing = TRUE),]
+df.top
+
+####################### VERIFICAR ISSO, ESTÁ ESTRANHO ###############
+rlog_out <- rlog(dds, blind =FALSE) #get normalized count data from dds object mat<-assay(rlog_out)[rownanes(df.top), rownames(coldata)] #sig genes × samples
+mat <- assay(rlog_out)[row.names(df.top), row.names(coldata)]
+colnames (mat) <- rownames(coldata)
+base_mean <- rowMeans(mat)
+mat.scaled <- t(apply(mat, 1, function(x) scale(x))) #center and scale each column (Z-score) then transpose
+colnames(mat.scaled)<-colnames(mat)
+
+num_keep <- 10
+rows_keep <- c(seq(1:num_keep), seq(nrow(mat.scaled)-num_keep), nrow(mat.scaled))
+
+l2_val <- as.matrix(df.top[rows_keep,]$log2FoldChange)
+colnames(l2_val) <- "logFC"
+
+mean <- as.matrix(df.top[rows_keep,]$baseMean)
+colnames(mean) <- "AveExpr"
+
+col_logFC <- colorRamp2(c(min(l2_val),0, max(l2_val)), c("blue", "white", "red"))
+col_AveExpr <- colorRamp2(c(quantile(mean)[1], quantile(mean)[4]), c("white", "red"))
+
+ha <- HeatmapAnnotation(summary = anno_summary(gp = gpar(fill = 2), 
+                                               height = unit(2, "cm")))
+
+
+
+h1 <- Heatmap(mat.scaled[rows_keep,], cluster_rows = F, 
+              column_labels = colnames(mat.scaled), name="Z-score",
+              cluster_columns = T)
+h2 <- Heatmap(l2_val, row_labels = df.top$symbol[rows_keep], 
+              cluster_rows = F, name="logFC", top_annotation = ha, col = col_logFC,
+              cell_fun = function(j, i, x, y, w, h, col) { # add text to each grid
+                grid.text(round(l2_val[i, j],2), x, y)
+              })
+h3 <- Heatmap(mean, row_labels = df.top$symbol[rows_keep], 
+              cluster_rows = F, name = "AveExpr", col=col_AveExpr,
+              cell_fun = function(j, i, x, y, w, h, col) { # add text to each grid
+                grid.text(round(mean[i, j],2), x, y)
+              })
+
+h<-h1+h2+h3
+h
+
+####################### PARTE ESTRANHA TERMINA AQUI ###############
+
+
+######################################### VOLCANO PLOT TESSTE ###########################
+
+row.names(sigs_df)
+View(sigs_df)
+
+sigs3 <- data.frame(GeneName = row.names(sigs_df), log2FoldChange = as.numeric(sigs_df$log2FoldChange), pvalue = sigs_df$padj)
+sigs3 <- data.frame(GeneName = row.names(sigs_df), log2FoldChange = as.numeric(sigs_df$log2FoldChange), pvalue = sigs_df$padj, symbol = sigs_df$symbol)
+
+
+
+EnhancedVolcano(sigs,
+                lab = sigs3$symbol,
+                x = 'log2FoldChange',
+                y = 'pvalue',
+                pCutoff = 10e-5,
+                FCcutoff = 1.333,
+                xlim = c(-5.7, 5.7),
+                ylim = c(0, -log10(10.2e-12)),
+                pointSize = 5.9,
+                labSize = 4.6,
+                title = 'Resultados',
+                subtitle = 'Análise de expressão diferencial',
+                caption = 'log2fc cutoff=1.333; p value cutof=10e-5',
+                legendPosition = "right",
+                legendLabSize = 14,
+                col = c('lightblue', 'orange', 'blue', 'red2'),
+                colAlpha = 0.7,
+                drawConnectors = TRUE,
+                hline = c(10e-8),
+                widthConnectors = 0.5)
+
+############# volcano teste concluído, realziar mais alguns ajustes, mas código está ok ###########
+
+##### NOVO HEATMAP ########
+plotMA(res, ylim=c(-5, 5), alpha = 0.01)
+
+topGene <- rownames(sigs_df)[sigs_df$padj <= sort(sigs_df$padj)[5] &!is.na(sigs_df$padj)]
+
+with(res[topGene, ], {
+  points(baseMean, log2FoldChange, col="dodgerblue", cex=1.5, lwd=2)
+  text(baseMean, log2FoldChange, topGene, pos=2, col="dodgerblue")
+})
+
+rld <- rlogTransformation(dds, blind=FALSE)
+sig.dat <- assay(rld)[res$padj < 0.05 & !is.na(res$padj), ]
+sig.dat.df <- as.data.frame(sig.dat)
+sig.dat.df$symbol <- mapIds(org.Hs.eg.db, keys = row.names(sig.dat.df), keytype = 'ENSEMBL', column = 'SYMBOL')
+rownames(sig.dat.df) <- NULL
+rownames(sig.dat.df) <- sig.dat.df$symbol
+sig.dat.df$symbol <- NULL
+sig.dat <- as.matrix(sig.dat.df)
+condition <- c('Diagnóstico', 'Recaída', 'Diagnóstico', 'Recaída', 'Diagnóstico', 'Recaída')
+annC <- data.frame(condition=condition)
+rownames(annC) <- colnames(sig.dat)
+pheatmap(sig.dat, scale="row", fontsize_row=9, annotation_col = annC)
+
