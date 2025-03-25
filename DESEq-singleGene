@@ -1,0 +1,82 @@
+library(ggplot2)
+library(ggpubr)
+library(dplyr)
+
+# Obter os valores normalizados do gene WT1
+wt1_counts <- counts(dds, normalized = TRUE)["ENSG00000184937", , drop = FALSE]
+
+# Criar um dataframe para o ggplot
+df_wt1 <- data.frame(
+  Sample = colnames(wt1_counts),
+  Expression = as.numeric(wt1_counts),
+  Condition = coldata$condition
+)
+
+# Extrair o p-valor do DESeq2
+p_deseq2 <- res["ENSG00000184937", "padj"]
+
+# Definir um limite superior ajustado
+y_max <- max(df_wt1$Expression, na.rm = TRUE)  # Maior valor de expressão
+y_line <- y_max + (y_max * 0.15)  # Posição da linha de comparação (15% acima do maior valor)
+y_pval <- y_line + (y_max * 0.08)  # Posição do p-valor (8% acima da linha)
+
+# Criar o gráfico aprimorado
+ggplot(df_wt1, aes(x = Condition, y = Expression, fill = Condition)) +
+  geom_bar(stat = "summary", fun = "mean", width = 0.6, color = "black") +  # Calcula média das amostras
+  geom_jitter(aes(color = Condition), width = 0.15, size = 3, alpha = 0.8) +  # Mostra pontos individuais
+  geom_errorbar(stat = "summary", fun.data = mean_se, width = 0.2, color = "black", size = 1) +  # Barras de erro
+  scale_fill_manual(values = c("R" = "#1B9E77", "S" = "#D95F02")) +  # Cores diferenciadas
+  scale_color_manual(values = c("R" = "#1B9E77", "S" = "#D95F02")) +  # Cor dos pontos individuais
+  scale_x_discrete(labels = c("R" = "Recaída", "S" = "Remissão")) +  # Altera os rótulos no eixo X
+  scale_y_continuous(expand = c(0, 0)) +  # Garante que as barras encostem no eixo X
+  theme_minimal(base_size = 16) +  # Fonte maior para publicação
+  labs(title = "MET",
+       x = "",
+       y = "Expressão Normalizada",
+       fill = "Condição") +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 18),
+    axis.text.x = element_text(face = "bold", size = 14),
+    axis.text.y = element_text(face = "bold", size = 14),
+    axis.title.y = element_text(face = "bold", size = 16),
+    panel.grid.major = element_blank(),  # Remove as grades internas
+    panel.grid.minor = element_blank(),  # Remove grades menores
+    axis.line = element_line(color = "black")  # Mantém os eixos visíveis
+  ) +
+  geom_segment(aes(x = 1, xend = 2, y = y_line, yend = y_line), 
+               size = 1, color = "black") +  # Linha de comparação entre grupos
+  annotate("text", x = 1.5, y = y_pval, 
+           label = paste("p-value =", format(p_deseq2, digits = 3)), size = 5) +
+  expand_limits(y = y_pval + (y_max * 0.1))  # Expande eixo Y para garantir visibilidade do p-valor
+
+
+# Criar o gráfico aprimorado com barras mais opacas
+ggplot(df_wt1, aes(x = Condition, y = Expression, fill = Condition)) +
+  geom_bar(stat = "summary", fun = "mean", width = 0.6, color = "black", alpha = 0.5) +  # Barras mais opacas
+  geom_jitter(aes(color = Condition), width = 0.15, size = 3, alpha = 0.8) +  # Mostra pontos individuais
+  geom_errorbar(stat = "summary", fun.data = mean_se, width = 0.2, color = "black", size = 1) +  # Barras de erro
+  scale_fill_manual(values = c("R" = "#1B9E77", "S" = "#D95F02")) +  # Cores diferenciadas
+  scale_color_manual(values = c("R" = "#1B9E77", "S" = "#D95F02")) +  # Cor dos pontos individuais
+  scale_x_discrete(labels = c("R" = "Recaída", "S" = "Remissão")) +  # Altera os rótulos no eixo X
+  scale_y_continuous(expand = c(0, 0)) +  # Garante que as barras encostem no eixo X
+  theme_minimal(base_size = 16) +  # Fonte maior para publicação
+  labs(title = "WT1",
+       x = "",
+       y = "Expressão Normalizada",
+       fill = "Condição") +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 18),
+    axis.text.x = element_text(face = "bold", size = 14),
+    axis.text.y = element_text(face = "bold", size = 14),
+    axis.title.y = element_text(face = "bold", size = 16),
+    panel.grid.major = element_blank(),  # Remove as grades internas
+    panel.grid.minor = element_blank(),  # Remove grades menores
+    axis.line = element_line(color = "black")  # Mantém os eixos visíveis
+  ) +
+  geom_segment(aes(x = 1, xend = 2, y = y_line, yend = y_line), 
+               size = 1, color = "black") +  # Linha de comparação entre grupos
+  annotate("text", x = 1.5, y = y_pval, 
+           label = paste("p-value =", format(p_deseq2, digits = 3)), size = 5) +
+  expand_limits(y = y_pval + (y_max * 0.1))  # Expande eixo Y para garantir visibilidade do p-valor
