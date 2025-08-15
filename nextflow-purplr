@@ -1,0 +1,1 @@
+nextflow run -dsl1 iarcbioinfo/purple-nf -r v1.1 -profile singularity   --tn_file file.txt --cohort_dir . --bam   --ref /home/bioinfo/RefSeq/RefBWA/hg38_v0_Homo_sapiens_assembly38.fasta   --ref_dict /home/bioinfo/RefSeq/RefBWA/hg38_v0_Homo_sapiens_assembly38.dict   --output_folder .
