@@ -1,3 +1,6 @@
+Script gerado para organizar chamadas de CNV do CNVkit junto com o BED do painel desejado. O CNVkit pode gerar chamadas longas demais, fora da aŕea de cobertura do painel, esse script retorna a chamada para a coordenada mais próxima. 
+
+
 #!/usr/bin/env bash
 set -euo pipefail
 
