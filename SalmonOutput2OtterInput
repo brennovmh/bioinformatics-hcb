@@ -1,0 +1,101 @@
+# ============================
+# 1) Upload de um ou mais arquivos .sf
+# ============================
+from google.colab import files
+uploaded = files.upload()  # ex.: TR3.quant.genes.sf, ABC123.quant.genes.sf, etc.
+
+# ============================
+# 2) Conversão para gene_id<TAB>TPM
+#    (Ensembl sem versão) + saída nomeada pela amostra
+# ============================
+import pandas as pd
+import numpy as np
+import re, os
+
+def infer_sample_name(path):
+    """Extrai o nome da amostra do nome do arquivo.
+       Ex.: 'TR3.quant.genes.sf' -> 'TR3'
+            'TR3.quant.sf'       -> 'TR3'
+            'TR3.sf'             -> 'TR3'
+            fallback: basename sem extensão.
+    """
+    bn = os.path.basename(path)
+    sample = re.sub(r"\.quant(?:\.genes)?\.sf$", "", bn, flags=re.IGNORECASE)
+    if sample == bn:
+        # fallback: remove última extensão
+        sample = os.path.splitext(bn)[0]
+    return sample
+
+def process_salmon_genes_sf(in_name):
+    # Lê TSV do Salmon gene-level
+    df = pd.read_csv(in_name, sep="\t", dtype=str)
+    req = {"Name", "TPM"}
+    if not req.issubset(df.columns):
+        raise ValueError(f"[{in_name}] Colunas esperadas {req}, encontradas: {list(df.columns)}")
+
+    # gene_id (sem versão) e TPM
+    df["gene_id"] = df["Name"].str.strip().str.replace(r"\.\d+$", "", regex=True)
+    df["TPM"] = pd.to_numeric(df["TPM"].str.replace(",", "."), errors="coerce")
+
+    # filtrar valores válidos
+    df = df.dropna(subset=["gene_id", "TPM"])
+    df = df[df["TPM"] >= 0]
+
+    # garantir padrão Ensembl
+    mask_strict = df["gene_id"].str.match(r"^ENSG\d{11}$", na=False)
+    if mask_strict.sum() >= len(df) * 0.5:
+        df = df[mask_strict]
+    else:
+        df = df[df["gene_id"].str.match(r"^ENSG\d+", na=False)]
+
+    # deduplicar por gene_id (mantém maior TPM)
+    df = df.sort_values("TPM", ascending=False).drop_duplicates(subset=["gene_id"], keep="first")
+    return df[["gene_id", "TPM"]]
+
+# Processa todos os arquivos enviados
+out_paths = []
+for in_name in uploaded.keys():
+    print(f"\nProcessando: {in_name}")
+    sample = infer_sample_name(in_name)
+    out_name = f"{sample}.tpm.tsv"   # <-- saída leva o nome da amostra
+    df_out = process_salmon_genes_sf(in_name)
+    df_out.to_csv(out_name, sep="\t", index=False, lineterminator="\n")
+    print(f"  Linhas finais: {len(df_out)}")
+    print(f"  Gerado: {out_name}")
+    out_paths.append(out_name)
+
+# ============================
+# 3) Download dos arquivos gerados
+# ============================
+for p in out_paths:
+    files.download(p)
+
+# =========================================================
+# (OPCIONAL) Também gerar TSV por HUGO gene_name para cada arquivo
+#  - Requer internet no Colab
+# =========================================================
+"""
+!pip -q install mygene
+import mygene
+mg = mygene.MyGeneInfo()
+
+for in_name in uploaded.keys():
+    sample = infer_sample_name(in_name)
+    out_hugo = f"{sample}.hugo_tpm.tsv"
+
+    # reabrir o TSV que acabamos de gerar para mapear ENSG -> símbolo
+    df_map = pd.read_csv(f"{sample}.tpm.tsv", sep="\t")
+    res = mg.querymany(df_map["gene_id"].tolist(),
+                       scopes="ensembl.gene",
+                       fields="symbol",
+                       species="human",
+                       as_dataframe=True)
+
+    res = res.rename_axis("gene_id").reset_index()
+    res = res[["gene_id", "symbol"]].dropna().drop_duplicates()
+    df_hugo = df_map.merge(res, on="gene_id", how="inner")
+    df_hugo = df_hugo.rename(columns={"symbol": "gene_name"})[["gene_name", "TPM"]]
+    df_hugo.to_csv(out_hugo, sep="\t", index=False, lineterminator="\n")
+    print(f"  Gerado (HUGO): {out_hugo}")
+    files.download(out_hugo)
+"""
