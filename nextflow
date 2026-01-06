@@ -4,3 +4,4 @@ nextflow run nf-core/createpanelrefs    -profile docker    --input samplesheet.c
 ###SAREK
  nextflow run nf-core/sarek     -profile docker     --input samplesheet.csv     --outdir results_germline/     --tools haplotypecaller
 
+nextflow run nf-core/oncoanalyser   -profile docker   -c /mnt/nas/RefSeq/oncoanalyzer-refs/hmf_refs.config   --input samplesheet.csv   --genome GRCh38_hmf   --mode targeted --panel tso500   --outdir tso500 -revision 2.3.0
