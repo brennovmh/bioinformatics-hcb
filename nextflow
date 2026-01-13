@@ -4,6 +4,8 @@ nextflow run nf-core/createpanelrefs    -profile docker    --input samplesheet.c
 ###SAREK
  nextflow run nf-core/sarek     -profile docker     --input samplesheet.csv     --outdir results_germline/     --tools haplotypecaller
 
-nextflow run nf-core/oncoanalyser   -profile docker   -c /mnt/nas/RefSeq/oncoanalyzer-refs/hmf_refs.config   --input samplesheet.csv   --genome GRCh38_hmf   --mode targeted --panel tso500   --outdir tso500 -revision 2.3.0
-
+##IDP
 nextflow run nf-core/oncoanalyser   -profile docker   -c /mnt/nas/RefSeq/oncoanalyzer-refs/hmf_refs.config -c /mnt/nas/RefSeq/oncoanalyzer-refs/IDP-panel/panel.config   --input 3847-samplesheet.csv   --genome GRCh38_hmf   --mode targeted --panel IDP --force_panel   --outdir idp-3847 -revision 2.3.0
+
+##CGP
+ nextflow run nf-core/oncoanalyser   -profile docker   -c /mnt/nas/RefSeq/oncoanalyzer-refs/hmf_refs.config -c /mnt/nas/RefSeq/oncoanalyzer-refs/CGP/painel.config   --input 2CGP-samplesheet.csv   --genome GRCh38_hmf   --mode targeted --panel CGP --force_panel   --outdir /mnt/nas/Analises/20-CGP_Agilent_07_05_2025/somatic -revision 2.3.0 -resume
