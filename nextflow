@@ -16,3 +16,6 @@ nextflow run nf-core/oncoanalyser   -profile docker   -c /mnt/nas/RefSeq/oncoana
 
 ##Phaseimpute
 nextflow run nf-core/phaseimpute   -profile docker   --input /mnt/nas/Analises_Germinativo_DRAGEN/BGE/IMPUTATION/samplesheet.csv   --panel /mnt/nas/RefSeq/GLIMPSE/ref-samplesheet.csv   --steps panelprep,impute   --genome GRCh38 --outdir results --tools glimpse2 
+
+## ONCOPED
+nextflow run nf-core/oncoanalyser   -profile docker   -c /mnt/nas/RefSeq/oncoanalyzer-refs/hmf_refs.config -c /mnt/nas/RefSeq/oncoanalyzer-refs/ONCOPED/panel.config   --input samplesheet.csv   --genome GRCh38_hmf   --mode targeted --panel ONCOPED --force_panel   --outdir results -revision 2.3.0
