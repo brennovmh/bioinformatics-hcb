@@ -19,3 +19,14 @@ nextflow run nf-core/phaseimpute   -profile docker   --input /mnt/nas/Analises_G
 
 ## ONCOPED
 nextflow run nf-core/oncoanalyser   -profile docker   -c /mnt/nas/RefSeq/oncoanalyzer-refs/hmf_refs.config -c /mnt/nas/RefSeq/oncoanalyzer-refs/ONCOPED/panel.config   --input samplesheet.csv   --genome GRCh38_hmf   --mode targeted --panel ONCOPED --force_panel   --outdir results -revision 2.3.0
+  NXF_SYNTAX_PARSER=v1 nextflow run nf-core/oncoanalyser \
+    -profile docker \
+    -c /mnt/nas/RefSeq/oncoanalyzer-refs/hmf_refs.config \
+    -c /mnt/nas/RefSeq/oncoanalyzer-refs/ONCOPED/panel.config \
+    --input samplesheet.csv \
+    --genome GRCh38_hmf \
+    --mode targeted \
+    --panel ONCOPED \
+    --force_panel \
+    --outdir /mnt/nas/Analises/46-HCB_ONCOPED_PANEL_TWIST_17_07_2026/oncoanalyzer \
+    -revision 2.3.0
